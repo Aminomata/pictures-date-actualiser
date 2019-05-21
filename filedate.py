@@ -41,7 +41,7 @@ def changeTime(f, i, today):
 
     tntime = (newtime + datetime.timedelta(seconds=i)).timestamp()
     # print('New date: ' + str(tntime))
-    print(tntime)
+    # print(tntime)
     os.utime(f, (tntime, tntime))
     # print('--------------')
 
@@ -64,17 +64,16 @@ def deleteEXIFData(f):
     return f + '.png'
 
 
-def changeDate(fileList, start, end, dFolder, dName, folder, fileCounter):
-    for i in range(start, end):
-        filename = fileList[i]
-        # print('File name: ' + filename)
-        f = dFolder + '/' + filename
-        shutil.copy(f, dName + '/backup/' + folder + '/' + filename)
-        changeCreationTime(f)
-        f = deleteEXIFData(f)
-        changeTime(f, i, newtime)
-        shutil.move(f, dName + '/sorted' + '/' +
-                    filename + '-' + ('%04d' % (fileCounter + i)) + '.png')
+def changeDate(fileList, i, dFolder, dName, folder, fileCounter):
+    filename = fileList[i]
+    # print('File name: ' + filename)
+    f = dFolder + '/' + filename
+    shutil.copy(f, dName + '/backup/' + folder + '/' + filename)
+    changeCreationTime(f)
+    f = deleteEXIFData(f)
+    changeTime(f, i, newtime)
+    shutil.move(f, dName + '/sorted' + '/' +
+                filename + '-' + ('%04d' % (fileCounter + i)) + '.png')
 
 
 def main():
@@ -90,7 +89,11 @@ def main():
             os.makedirs(dName + '/backup')
 
         fileCounter = 0
-        for folder in os.listdir(dName):
+        folderList = os.listdir(dName)
+        numberOfFolders = len(folderList)
+        for j in range(0, numberOfFolders):
+            print(f"Folder {j}/{numberOfFolders}")
+            folder = folderList[j]
             if (folder == "sorted" or folder == "backup"):
                 continue
             dFolder = dName + '/' + folder
@@ -100,14 +103,14 @@ def main():
             fileList = os.listdir(dFolder)
             numberOfFiles = len(fileList)
             threads = []
-            for i in range(0, 4):
+            for i in range(0, numberOfFiles):
                 thread = Thread(target=changeDate, args=(
-                    fileList, i * numberOfFiles // 4, (i + 1) * numberOfFiles // 4, dFolder, dName, folder, fileCounter))
+                    fileList, i, dFolder, dName, folder, fileCounter))
                 thread.start()
                 threads.append(thread)
 
             for t in threads:
-                t.join()
+               t.join()
             fileCounter += numberOfFiles
             newtime = newtime + datetime.timedelta(seconds=numberOfFiles)
 
