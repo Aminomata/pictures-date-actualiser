@@ -91,10 +91,12 @@ def main():
         fileCounter = 0
         folderList = os.listdir(dName)
         numberOfFolders = len(folderList)
+        skipped_folders = 0
         for j in range(0, numberOfFolders):
-            print(f"Folder {j}/{numberOfFolders}")
             folder = folderList[j]
             if (folder == "sorted" or folder == "backup"):
+                skipped_folders += 1
+                numberOfFolders -= 1
                 continue
             dFolder = dName + '/' + folder
             if not os.path.exists(dName + '/backup/' + folder):
@@ -113,6 +115,8 @@ def main():
                t.join()
             fileCounter += numberOfFiles
             newtime = newtime + datetime.timedelta(seconds=numberOfFiles)
+            print(f"Folder {j + 1 - skipped_folders}/{numberOfFolders}")
+
 
         t2 = time.time()
         print(f"Took {t2 - t1} seconds")
