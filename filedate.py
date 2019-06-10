@@ -83,20 +83,22 @@ def main():
     while (1):
         t1 = time.time()
         dName = chooseFileName()
-        if not os.path.exists(dName + '/sorted'):
-            os.makedirs(dName + '/sorted')
-        if not os.path.exists(dName + '/backup'):
-            os.makedirs(dName + '/backup')
-
-        fileCounter = 0
         folderList = os.listdir(dName)
         numberOfFolders = len(folderList)
-        skipped_folders = 0
+
+        if not os.path.exists(dName + '/sorted'):
+            os.makedirs(dName + '/sorted')
+        else:
+            numberOfFolders -= 1
+        if not os.path.exists(dName + '/backup'):
+            os.makedirs(dName + '/backup')
+        else:
+            numberOfFolders -= 1
+
+        fileCounter = 0
         for j in range(0, numberOfFolders):
             folder = folderList[j]
             if (folder == "sorted" or folder == "backup"):
-                skipped_folders += 1
-                numberOfFolders -= 1
                 continue
             dFolder = dName + '/' + folder
             if not os.path.exists(dName + '/backup/' + folder):
@@ -112,11 +114,10 @@ def main():
                 threads.append(thread)
 
             for t in threads:
-               t.join()
+                t.join()
             fileCounter += numberOfFiles
             newtime = newtime + datetime.timedelta(seconds=numberOfFiles)
-            print(f"Folder {j + 1 - skipped_folders}/{numberOfFolders}")
-
+            print(f"Folder {j + 1}/{numberOfFolders}")
 
         t2 = time.time()
         print(f"Took {t2 - t1} seconds")
